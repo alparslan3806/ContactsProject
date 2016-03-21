@@ -1,6 +1,7 @@
 package alp.contactsproject;
 
 import android.app.Activity;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,10 +11,21 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.SimpleAdapter;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
 
 public class MainActivity extends Activity {
 
@@ -22,6 +34,7 @@ public class MainActivity extends Activity {
     private List<Map<String, String>> phoneAndNameMap = new ArrayList<>();
     private Map<String, String> item = new HashMap<>();
     private Operators operators = new Operators();
+    private final String FILENAME = "contractslist";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,8 +97,25 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void backUpClicked(View view)
-    {
+    public void backUpClicked(View view) throws IOException {
+        String fpath = "/sdcard/" + FILENAME + ".txt";
+        File file = new File(fpath);
+        if(!file.exists())
+        {
+            file.createNewFile();
+        }
 
+        FileWriter fwriter = new FileWriter(file.getAbsoluteFile());
+        BufferedWriter bw = new BufferedWriter(fwriter);
+
+        Iterator<Map.Entry<String, String>> entries  = item.entrySet().iterator();
+        while (entries.hasNext())
+        {
+            Map.Entry<String, String> entry = entries.next();
+            String toFile = entry.getKey() + " "  + entry.getValue() + System.getProperty("line.separator");
+            bw.write(toFile);
+        }
+        bw.close();
+        fwriter.close();
     }
 }
