@@ -71,15 +71,21 @@ public class MainActivity extends Activity {
                 printHasMap(temp);
                 aveaRadioButton.setChecked(true);
                 break;
+            case R.id.vodafoneRadioButton:
+                temp = operators.getOperator(item, '4');
+                printHasMap(temp);
+                vodafoneRadioButton.setChecked(true);
+                break;
             case R.id.turkcellRadioButton:
                 temp = operators.getOperator(item, '3');
                 printHasMap(temp);
                 turkcellRadioButton.setChecked(true);
                 break;
-            case R.id.vodafoneRadioButton:
-                temp = operators.getOperator(item, '4');
-                printHasMap(temp);
-                vodafoneRadioButton.setChecked(true);
         }
+    }
+
+    public void backUpClicked(View view)
+    {
+
     }
 }

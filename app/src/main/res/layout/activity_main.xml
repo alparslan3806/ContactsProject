@@ -29,6 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="radioButtonOnClick"
+            android:checked="false"
             android:text="Avea" />
 
         <RadioButton
@@ -40,6 +41,20 @@
             android:text="Vodafone" />
     </RadioGroup>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/back_up"
+        android:onClick="backUpClicked"
+        android:id="@+id/backUp" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/recover"
+        android:id="@+id/recover"
+        android:layout_gravity="right" />
+
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
@@ -47,4 +62,5 @@
         android:layout_gravity="center"
         android:divider="@null"
         android:dividerHeight="0dp" />
+
 </LinearLayout>
