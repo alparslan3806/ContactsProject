@@ -10,9 +10,9 @@ import java.util.Map;
  * Created by Toshıba on 21.3.2016.
  */
 public class Operators {
+
     public List<Map<String, String>> getOperator(Map<String, String> numberAndNameMap, char number1) {
         List<Map<String, String>> listOperator = new ArrayList<>();
-
 
         Iterator<Map.Entry<String, String>> map = numberAndNameMap.entrySet().iterator();
         Iterator<Map.Entry<String, String>> map2 = numberAndNameMap.entrySet().iterator();
@@ -33,11 +33,9 @@ public class Operators {
                     operatorMap.put("userNumber", entry.getValue());
                     listOperator.add(operatorMap);
                 }
-
             }
 
-            if(number1 == '5')
-            { /** This part of code is for avea which its number can start with 050... and 055... both.*/
+            if (number1 == '5') { /** This part of code is for avea which its number can start with 050... and 055... both.*/
                 while (map2.hasNext()) {
                     Map.Entry<String, String> entry = map2.next();
                     Map operatorMap = new HashMap();
@@ -54,10 +52,7 @@ public class Operators {
                         operatorMap.put("userNumber", entry.getValue());
                         listOperator.add(operatorMap);
                     }
-
                 }
-
-
             }
         }
         return listOperator;

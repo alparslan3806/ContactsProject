@@ -53,6 +53,7 @@
         android:layout_height="wrap_content"
         android:text="@string/recover"
         android:id="@+id/recover"
+        android:onClick="btnRestoreClicked"
         android:layout_gravity="right" />
 
     <ListView

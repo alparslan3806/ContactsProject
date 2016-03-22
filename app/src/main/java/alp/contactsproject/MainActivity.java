@@ -1,31 +1,33 @@
 package alp.contactsproject;
 
 import android.app.Activity;
-import android.content.Context;
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.provider.ContactsContract;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.SimpleAdapter;
+import android.widget.Toast;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.ReadWriteLock;
+import java.util.regex.*;
 
 public class MainActivity extends Activity {
 
@@ -34,7 +36,7 @@ public class MainActivity extends Activity {
     private List<Map<String, String>> phoneAndNameMap = new ArrayList<>();
     private Map<String, String> item = new HashMap<>();
     private Operators operators = new Operators();
-    private final String FILENAME = "contractslist";
+    private final String FILENAME = "contactslist";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +67,6 @@ public class MainActivity extends Activity {
         aveaRadioButton = (RadioButton) findViewById(R.id.aveaRadioButton);
         turkcellRadioButton = (RadioButton) findViewById(R.id.turkcellRadioButton);
         vodafoneRadioButton = (RadioButton) findViewById(R.id.vodafoneRadioButton);
-
     }
 
     public void printHasMap(List<Map<String, String>> listMap) {
@@ -100,22 +101,99 @@ public class MainActivity extends Activity {
     public void backUpClicked(View view) throws IOException {
         String fpath = "/sdcard/" + FILENAME + ".txt";
         File file = new File(fpath);
-        if(!file.exists())
-        {
+        if (!file.exists()) {
             file.createNewFile();
         }
 
         FileWriter fwriter = new FileWriter(file.getAbsoluteFile());
         BufferedWriter bw = new BufferedWriter(fwriter);
 
-        Iterator<Map.Entry<String, String>> entries  = item.entrySet().iterator();
-        while (entries.hasNext())
-        {
+        Iterator<Map.Entry<String, String>> entries = item.entrySet().iterator();
+        while (entries.hasNext()) {
             Map.Entry<String, String> entry = entries.next();
-            String toFile = entry.getKey() + " "  + entry.getValue() + System.getProperty("line.separator");
+            String toFile = entry.getKey() + ":" + entry.getValue() + System.getProperty("line.separator");
             bw.write(toFile);
         }
+        Toast toast = Toast.makeText(this, "Succesfully Backed Up",Toast.LENGTH_SHORT);
+        toast.show();
         bw.close();
         fwriter.close();
+    }
+
+    public void btnRestoreClicked(View view) {
+
+        Map<String, String> contactsFromFile = new HashMap<>();
+        String fpath = "/sdcard/" + FILENAME + ".txt";
+        File file = new File(fpath);
+
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            InputStreamReader isr = new InputStreamReader(fis);
+
+            BufferedReader br = new BufferedReader(isr);
+            String line = "";
+
+            while (br.readLine() != null) {
+                line = br.readLine();
+                String[] arrayOfString = line.split(":");
+                contactsFromFile.put(arrayOfString[0], arrayOfString[1]);
+                /** Here I get the contact list which is backed up in file before. */
+            }
+
+            int i = 0;
+            Iterator<Map.Entry<String, String>> contatcsIterator = contactsFromFile.entrySet().iterator();
+            while (contatcsIterator.hasNext()) {
+                Map.Entry<String, String> contactIterator = contatcsIterator.next();
+
+                if (!item.containsKey(contactIterator.getKey())) {
+                    createContact(contactIterator.getKey(), contactIterator.getValue());
+                    i++;
+                }
+            }
+
+            if(i>0)
+            {
+                Toast toast = Toast.makeText(this, "Succesfully Recovered!", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+            else{
+                Toast toast = Toast.makeText(this, "Contact List is up-to-date", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createContact(String key, String value) {
+        ArrayList<ContentProviderOperation> opsList = new ArrayList<ContentProviderOperation>();
+        int rawContactInsertIndex = opsList.size();
+
+        opsList.add(ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
+                .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
+                .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null)
+                .build());
+
+        opsList.add(ContentProviderOperation
+                .newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, key)
+                .build());
+
+        opsList.add(ContentProviderOperation
+                .newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(
+                        ContactsContract.Data.RAW_CONTACT_ID, rawContactInsertIndex)
+                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, value)
+                .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
+                .build());
+        try {
+            ContentProviderResult[] res = getContentResolver().applyBatch(ContactsContract.AUTHORITY, opsList);
+        } catch (RemoteException | OperationApplicationException e) {
+            e.printStackTrace();
+        }
     }
 }
