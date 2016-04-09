@@ -9,6 +9,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.provider.ContactsContract;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.RadioButton;
@@ -19,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -32,7 +35,7 @@ import java.util.regex.*;
 public class MainActivity extends Activity {
 
     private ListView listView;
-    private RadioButton aveaRadioButton, turkcellRadioButton, vodafoneRadioButton;
+    private RadioButton aveaRadioButton, turkcellRadioButton, vodafoneRadioButton, allNumbers;
     private List<Map<String, String>> phoneAndNameMap = new ArrayList<>();
     private Map<String, String> item = new HashMap<>();
     private Operators operators = new Operators();
@@ -67,6 +70,7 @@ public class MainActivity extends Activity {
         aveaRadioButton = (RadioButton) findViewById(R.id.aveaRadioButton);
         turkcellRadioButton = (RadioButton) findViewById(R.id.turkcellRadioButton);
         vodafoneRadioButton = (RadioButton) findViewById(R.id.vodafoneRadioButton);
+        allNumbers = (RadioButton) findViewById(R.id.allNumbers);
     }
 
     public void printHasMap(List<Map<String, String>> listMap) {
@@ -95,6 +99,11 @@ public class MainActivity extends Activity {
                 printHasMap(temp);
                 turkcellRadioButton.setChecked(true);
                 break;
+            case R.id.allNumbers:
+                temp = operators.getAllNumbers(item);
+                printHasMap(temp);
+                allNumbers.setChecked(true);
+                break;
         }
     }
 
@@ -111,58 +120,56 @@ public class MainActivity extends Activity {
         Iterator<Map.Entry<String, String>> entries = item.entrySet().iterator();
         while (entries.hasNext()) {
             Map.Entry<String, String> entry = entries.next();
-            String toFile = entry.getKey() + ":" + entry.getValue() + System.getProperty("line.separator");
-            bw.write(toFile);
+            String separator = "\r\n";
+            StringBuilder lines = new StringBuilder();
+
+            lines.append(entry.getKey());
+            lines.append(":");
+            lines.append(entry.getValue());
+            lines.append(separator);
+            bw.write(lines.toString());
         }
-        Toast toast = Toast.makeText(this, "Succesfully Backed Up",Toast.LENGTH_SHORT);
+        Toast toast = Toast.makeText(this, "Succesfully Backed Up", Toast.LENGTH_SHORT);
         toast.show();
         bw.close();
         fwriter.close();
     }
 
-    public void btnRestoreClicked(View view) {
+    public void btnRestoreClicked(View view) throws IOException {
 
         Map<String, String> contactsFromFile = new HashMap<>();
         String fpath = "/sdcard/" + FILENAME + ".txt";
         File file = new File(fpath);
 
-        try {
-            FileInputStream fis = new FileInputStream(file);
-            InputStreamReader isr = new InputStreamReader(fis);
+        FileInputStream fis = new FileInputStream(file);
+        InputStreamReader isr = new InputStreamReader(fis);
 
-            BufferedReader br = new BufferedReader(isr);
-            String line = "";
+        BufferedReader br = new BufferedReader(isr);
+        String line = "";
 
-            while (br.readLine() != null) {
-                line = br.readLine();
-                String[] arrayOfString = line.split(":");
-                contactsFromFile.put(arrayOfString[0], arrayOfString[1]);
-                /** Here I get the contact list which is backed up in file before. */
+        while ((line = br.readLine()) != null) {
+            String[] arrayOfString = line.split(":");
+            contactsFromFile.put(arrayOfString[0], arrayOfString[1]);
+            /** Here I get the contact list which is backed up in file before. */
+        }
+
+        int i = 0;
+        Iterator<Map.Entry<String, String>> contatcsIterator = contactsFromFile.entrySet().iterator();
+        while (contatcsIterator.hasNext()) {
+            Map.Entry<String, String> contactIterator = contatcsIterator.next();
+
+            if (!item.containsKey(contactIterator.getKey())) {
+                createContact(contactIterator.getKey(), contactIterator.getValue());
+                i++;
             }
+        }
 
-            int i = 0;
-            Iterator<Map.Entry<String, String>> contatcsIterator = contactsFromFile.entrySet().iterator();
-            while (contatcsIterator.hasNext()) {
-                Map.Entry<String, String> contactIterator = contatcsIterator.next();
-
-                if (!item.containsKey(contactIterator.getKey())) {
-                    createContact(contactIterator.getKey(), contactIterator.getValue());
-                    i++;
-                }
-            }
-
-            if(i>0)
-            {
-                Toast toast = Toast.makeText(this, "Succesfully Recovered!", Toast.LENGTH_SHORT);
-                toast.show();
-            }
-            else{
-                Toast toast = Toast.makeText(this, "Contact List is up-to-date", Toast.LENGTH_SHORT);
-                toast.show();
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (i > 0) {
+            Toast toast = Toast.makeText(this, "Succesfully Recovered!", Toast.LENGTH_SHORT);
+            toast.show();
+        } else {
+            Toast toast = Toast.makeText(this, "Contact List is up-to-date", Toast.LENGTH_SHORT);
+            toast.show();
         }
     }
 

@@ -11,6 +11,25 @@ import java.util.Map;
  */
 public class Operators {
 
+    public List<Map<String, String>> getAllNumbers(Map<String, String> numberAndNameMap)
+    {
+        List<Map<String, String>> listOperator = new ArrayList<>();
+
+        Iterator<Map.Entry<String, String >> map = numberAndNameMap.entrySet().iterator();
+        if( map != null )
+        {
+            while (map.hasNext()) {
+                Map.Entry<String, String> entry = map.next();
+                Map operatorMap = new HashMap();
+                operatorMap.put("userIcon", R.drawable.nouser);
+                operatorMap.put("userName", entry.getKey());
+                operatorMap.put("userNumber", entry.getValue());
+                listOperator.add(operatorMap);
+            }
+        }
+        return listOperator;
+    }
+
     public List<Map<String, String>> getOperator(Map<String, String> numberAndNameMap, char number1) {
         List<Map<String, String>> listOperator = new ArrayList<>();
 

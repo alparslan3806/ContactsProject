@@ -2,4 +2,8 @@
     <string name="app_name">Contacts Recovery Project</string>
     <string name="back_up">Back Up</string>
     <string name="recover">Recover</string>
+    <string name="avea">Avea</string>
+    <string name="turkcell">Turkcell</string>
+    <string name="vodafone">Vodafone</string>
+    <string name="all_numbers">All</string>
 </resources>

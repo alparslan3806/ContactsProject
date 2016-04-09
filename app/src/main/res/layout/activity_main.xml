@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:checked="false"
             android:onClick="radioButtonOnClick"
-            android:text="Turkcell" />
+            android:text="@string/turkcell" />
 
         <RadioButton
             android:id="@+id/aveaRadioButton"
@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:checked="false"
             android:onClick="radioButtonOnClick"
-            android:text="Avea" />
+            android:text="@string/avea" />
 
         <RadioButton
             android:id="@+id/vodafoneRadioButton"
@@ -39,7 +39,14 @@
             android:layout_height="wrap_content"
             android:checked="false"
             android:onClick="radioButtonOnClick"
-            android:text="Vodafone" />
+            android:text="@string/vodafone" />
+        <RadioButton
+            android:id="@+id/allNumbers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:onClick="radioButtonOnClick"
+            android:text="@string/all_numbers" />
     </RadioGroup>
 
     <ListView
