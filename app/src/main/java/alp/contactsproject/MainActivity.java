@@ -3,15 +3,15 @@ package alp.contactsproject;
 import android.app.Activity;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
+import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.provider.ContactsContract;
-import android.provider.Settings;
-import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.SimpleAdapter;
@@ -21,7 +21,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -30,7 +29,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.*;
 
 public class MainActivity extends Activity {
 
@@ -201,6 +199,19 @@ public class MainActivity extends Activity {
             ContentProviderResult[] res = getContentResolver().applyBatch(ContactsContract.AUTHORITY, opsList);
         } catch (RemoteException | OperationApplicationException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void numberClicked(View view)
+    {
+        Button numberButtonToText = (Button) view;
+        String buttonText = numberButtonToText.getText().toString();
+
+        if(buttonText != null)
+        {
+            Uri uri = Uri.parse("tel:" + buttonText);
+            Intent callIntent = new Intent(Intent.ACTION_DIAL, uri);
+            startActivity(callIntent);
         }
     }
 }
